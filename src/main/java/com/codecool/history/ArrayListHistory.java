@@ -12,10 +12,7 @@ public class ArrayListHistory implements History {
 
     @Override
     public void add(String text) {
-        text = text.replaceAll("\n", " ")
-                .replaceAll(System.lineSeparator(), " ")
-                .replaceAll("\t", " ")
-                .replaceAll(" +", " ");
+        text = text.replaceAll("\\s+| +", " ");
         String[] words = text.split(" ");
 
         wordsArrayList.addAll(Arrays.asList(words));
@@ -23,12 +20,21 @@ public class ArrayListHistory implements History {
 
     @Override
     public void removeWord(String wordToBeRemoved) {
+        List<String> newWordsArrayList = new ArrayList<>();
+        for (int idx = 0; idx < wordsArrayList.size(); idx++) {
+            if (!wordsArrayList.get(idx).equals(wordToBeRemoved)) {
+                newWordsArrayList.add(wordsArrayList.get(idx));
+            }
+        }
+        wordsArrayList = newWordsArrayList;
+        //wordsArrayList.removeIf(name -> name.equals(wordToBeRemoved));
+        /*
         for (int idx = 0; idx < wordsArrayList.size(); idx++) {
             if (wordsArrayList.get(idx).equals(wordToBeRemoved)) {
                 wordsArrayList.remove(idx);
                 idx--;
             }
-        }
+        } */
     }
 
     @Override
@@ -43,19 +49,29 @@ public class ArrayListHistory implements History {
 
     @Override
     public void replaceOneWord(String from, String to) {
+        List<String> newWordsArrayList = new ArrayList<>();
         for (int i = 0; i < wordsArrayList.size(); i++) {
+            if (wordsArrayList.get(i).equals(from)) {
+                newWordsArrayList.add(to);
+            }
+            else newWordsArrayList.add(wordsArrayList.get(i));
+        }
+        wordsArrayList = newWordsArrayList;
+        //wordsArrayList.replaceAll(s -> s.equals(from) ? to : s);
+        /*for (int i = 0; i < wordsArrayList.size(); i++) {
             if (wordsArrayList.get(i).equals(from)) {
                 wordsArrayList.set(i, to);
             }
-        }
+        } */
     }
 
     @Override
     public void replaceMoreWords(String[] fromWords, String[] toWords) {
-        int i = 0;
-        while (i < wordsArrayList.size()) {
+        List<String> newWordsArrayList = new ArrayList<>();
+        for (int i = 0; i < wordsArrayList.size(); i++) {
+
             if (!wordsArrayList.get(i).equals(fromWords[0])) {
-                i++;
+                newWordsArrayList.add(wordsArrayList.get(i));
                 continue;
             }
 
@@ -65,27 +81,25 @@ public class ArrayListHistory implements History {
                 if (currentIdx > (wordsArrayList.size() - 1)) {
                     // end of string
                     match = false;
-                    i++;
+                    newWordsArrayList.add(wordsArrayList.get(i));
                     break;
                 }
 
                 if (!wordsArrayList.get(currentIdx).equals(fromWords[j])) {
                     match = false;
-                    i++;
+                    newWordsArrayList.add(wordsArrayList.get(i));
                     break;
                 }
             }
 
             if (match) {
-                for (int j = 0; j < fromWords.length; j++) {
-                    wordsArrayList.remove(i);
-                }
                 for (int j = 0; j < toWords.length; j++) {
-                    wordsArrayList.add(i + j, toWords[j]);
+                    newWordsArrayList.add(toWords[j]);
                 }
-                i += toWords.length;
+                i += fromWords.length - 1;
             }
         }
+        wordsArrayList = newWordsArrayList;
     }
 
     @Override
