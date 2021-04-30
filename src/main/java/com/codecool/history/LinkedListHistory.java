@@ -1,8 +1,6 @@
 package com.codecool.history;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class LinkedListHistory implements History {
     /**
@@ -12,10 +10,7 @@ public class LinkedListHistory implements History {
 
     @Override
     public void add(String text) {
-        text = text.replaceAll("\n", " ")
-                .replaceAll(System.lineSeparator(), " ")
-                .replaceAll("\t", " ")
-                .replaceAll(" +", " ");
+        text = text.replaceAll("\\s+| +", " ");
         String[] words = text.split(" ");
 
         wordsLinkedList.addAll(Arrays.asList(words));
@@ -23,12 +18,7 @@ public class LinkedListHistory implements History {
 
     @Override
     public void removeWord(String wordToBeRemoved) {
-        for (int idx = 0; idx < wordsLinkedList.size(); idx++) {
-            if (wordsLinkedList.get(idx).equals(wordToBeRemoved)) {
-                wordsLinkedList.remove(idx);
-                idx--;
-            }
-        }
+        wordsLinkedList.removeIf(s -> s.equals(wordToBeRemoved));
     }
 
     @Override
@@ -43,47 +33,64 @@ public class LinkedListHistory implements History {
 
     @Override
     public void replaceOneWord(String from, String to) {
-        for (int i = 0; i < wordsLinkedList.size(); i++) {
-            if (wordsLinkedList.get(i).equals(from)) {
-                wordsLinkedList.set(i, to);
+        ListIterator<String> it = wordsLinkedList.listIterator();
+        while (it.hasNext()) {
+            if (it.next().equals(from)) {
+                it.set(to);
             }
         }
     }
 
     @Override
     public void replaceMoreWords(String[] fromWords, String[] toWords) {
-        int i = 0;
-        while (i < wordsLinkedList.size()) {
-            if (!wordsLinkedList.get(i).equals(fromWords[0])) {
-                i++;
+
+        ListIterator<String> it = wordsLinkedList.listIterator();
+        while (it.hasNext()) {
+            if (!it.next().equals(fromWords[0])) {
                 continue;
             }
-
-            boolean match = true;
-            for (int j = 1; j < fromWords.length; j++) {
-                int currentIdx = i + j;
-                if (currentIdx > (wordsLinkedList.size() - 1)) {
-                    // end of string
-                    match = false;
-                    i++;
-                    break;
+            boolean match = false;
+            int counter = 1;
+            if (fromWords.length == 1) match = true;
+            else {
+                while (it.hasNext()) {
+                    if (it.next().equals(fromWords[counter])) {
+                        counter++;
+                    } else {
+                        break;
+                    }
+                    if (counter == fromWords.length) {
+                        match = true;
+                        break;
+                    }
                 }
+            }
 
-                if (!wordsLinkedList.get(currentIdx).equals(fromWords[j])) {
-                    match = false;
-                    i++;
-                    break;
-                }
+            for (int i = 1; i < counter; i++) {
+                it.previous();
             }
 
             if (match) {
-                for (int j = 0; j < fromWords.length; j++) {
-                    wordsLinkedList.remove(i);
+                it.previous();
+                int length = Math.max(fromWords.length, toWords.length);
+                counter = 0;
+                while (it.hasNext()) {
+                    it.next();
+                    if (fromWords.length > counter && toWords.length > counter) {
+                        it.set(toWords[counter]);
+                    } else if (fromWords.length > counter) {
+                        it.remove();
+                    }
+                    counter++;
+                    if (fromWords.length <= counter){
+                        while (counter < length) {
+                            it.add(toWords[counter]);
+                            counter++;
+                        }
+                    }
+                    if (counter >= length) break;;
+
                 }
-                for (int j = 0; j < toWords.length; j++) {
-                    wordsLinkedList.add(i + j, toWords[j]);
-                }
-                i += toWords.length;
             }
         }
     }

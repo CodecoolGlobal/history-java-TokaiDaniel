@@ -27,14 +27,6 @@ public class ArrayListHistory implements History {
             }
         }
         wordsArrayList = newWordsArrayList;
-        //wordsArrayList.removeIf(name -> name.equals(wordToBeRemoved));
-        /*
-        for (int idx = 0; idx < wordsArrayList.size(); idx++) {
-            if (wordsArrayList.get(idx).equals(wordToBeRemoved)) {
-                wordsArrayList.remove(idx);
-                idx--;
-            }
-        } */
     }
 
     @Override
@@ -57,12 +49,6 @@ public class ArrayListHistory implements History {
             else newWordsArrayList.add(wordsArrayList.get(i));
         }
         wordsArrayList = newWordsArrayList;
-        //wordsArrayList.replaceAll(s -> s.equals(from) ? to : s);
-        /*for (int i = 0; i < wordsArrayList.size(); i++) {
-            if (wordsArrayList.get(i).equals(from)) {
-                wordsArrayList.set(i, to);
-            }
-        } */
     }
 
     @Override
